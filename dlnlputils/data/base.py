@@ -1,7 +1,10 @@
 import collections
 import re
-
+import spacy
 import numpy as np
+from tqdm import tqdm_notebook
+from multiprocessing import cpu_count, Pool
+
 
 TOKEN_RE = re.compile(r'[\w\d]+')
 
@@ -11,14 +14,37 @@ def tokenize_text_simple_regex(txt, min_token_size=4):
     all_tokens = TOKEN_RE.findall(txt)
     return [token for token in all_tokens if len(token) >= min_token_size]
 
+def spacy_tokenizer(txt, nlp):
+    tokens = []
+    pos = ('PROPN', 'VERB', 'PART', 'NOUN', 'ADV',
+           'ADJ', 'CCONJ', 'PRON', 'INTJ', 'NUM', 'PART')
+    for token in nlp(txt):
+        if re.match(r'[a-zA-Z]+', token.lemma_) and token.pos_ in pos:
+            tokens.append(token.lemma_.lower())
+    return tokens
+
 
 def character_tokenize(txt):
     return list(txt)
 
 
-def tokenize_corpus(texts, tokenizer=tokenize_text_simple_regex, **tokenizer_kwargs):
-    return [tokenizer(text, **tokenizer_kwargs) for text in texts]
+# def tokenize_corpus(texts, tokenizer=tokenize_text_simple_regex, **tokenizer_kwargs):
+#     return [tokenizer(text, **tokenizer_kwargs) for text in texts]
 
+
+def tokenize_corpus(texts, tokenizer='spacy', **tokenizer_kwargs):  # tokenize_text_simple_regex
+    
+    if tokenizer == 'spacy':
+        
+        tokenizer_kwargs.update({'nlp': spacy.load('en_core_web_sm')})
+        tokenizer = spacy_tokenizer
+        
+    elif tokenizer == 'regex':
+        tokenizer = spacy_tokenizer
+    corpus_tokens = []
+    for text in tqdm_notebook(texts):
+        corpus_tokens.append(tokenizer(text, **tokenizer_kwargs))
+    return corpus_tokens
 
 def add_fake_token(word2id, token='<PAD>'):
     word2id_new = {token: i + 1 for token, i in word2id.items()}
@@ -77,3 +103,11 @@ NUMERIC_RE = re.compile(r'^([0-9.,e+\-]+|[mcxvi]+)$', re.I)
 def replace_number_nokens(tokenized_texts):
     return [[token if not NUMERIC_RE.match(token) else NUMERIC_TOKEN for token in text]
             for text in tokenized_texts]
+
+
+if __name__ == '__main__':
+    texts = [
+        "Returns an iterator over all modules in the network, yielding both the name of the module as well as the module itself.",
+        "Duplicate modules are returned only once. In the following example, l will be returned only once."
+    ]
+    print(tokenize_corpus(texts, tokenizer='spacy'))
