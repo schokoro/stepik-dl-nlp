@@ -46,7 +46,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
                     max_batches_per_epoch_val=1000,
                     data_loader_ctor=DataLoader,
                     optimizer_ctor=None,
-                    optimizer_params = None
+                    optimizer_params=None,
                     lr_scheduler_ctor=None,
                     shuffle_train=True,
                     dataloader_workers_n=0):
@@ -67,6 +67,11 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
     :param max_batches_per_epoch_val: максимальное количество итераций на одну эпоху валидации
     :param data_loader_ctor: функция для создания объекта, преобразующего датасет в батчи
         (по умолчанию torch.utils.data.DataLoader)
+    :param optimizer_ctor
+    :param optimizer_params
+    :param lr_scheduler_ctor
+    :param shuffle_train
+    :param dataloader_workers_n
     :return: кортеж из двух элементов:
         - среднее значение функции потерь на валидации на лучшей эпохе
         - лучшая модель
@@ -74,7 +79,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
     device = torch.device(device)
     model.to(device)
     
-    if optimizer_params == None:
+    if optimizer_params is None:
         optimizer_params = {'lr': lr}
     else:
         optimizer_params['lr'] = lr
