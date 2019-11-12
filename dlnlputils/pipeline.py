@@ -46,6 +46,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
                     max_batches_per_epoch_val=1000,
                     data_loader_ctor=DataLoader,
                     optimizer_ctor=None,
+                    optimizer_params = None
                     lr_scheduler_ctor=None,
                     shuffle_train=True,
                     dataloader_workers_n=0):
@@ -72,11 +73,16 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
     """
     device = torch.device(device)
     model.to(device)
+    
+    if optimizer_params == None:
+        optimizer_params = {'lr': lr}
+    else:
+        optimizer_params['lr'] = lr
 
     if optimizer_ctor is None:
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=l2_reg_alpha)
     else:
-        optimizer = optimizer_ctor(model.parameters(), lr=lr)
+        optimizer = optimizer_ctor(model.parameters(), **optimizer_params)
 
     if lr_scheduler_ctor is not None:
         lr_scheduler = lr_scheduler_ctor(optimizer)
