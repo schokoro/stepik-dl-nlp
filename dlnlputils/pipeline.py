@@ -88,6 +88,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=l2_reg_alpha)
     else:
         optimizer = optimizer_ctor(model.parameters(), **optimizer_params)
+    print(optimizer)
 
     if lr_scheduler_ctor is not None:
         lr_scheduler = lr_scheduler_ctor(optimizer)
