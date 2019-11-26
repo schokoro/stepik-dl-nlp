@@ -2,7 +2,7 @@ import copy
 import datetime
 import random
 import traceback
-
+import time
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -113,6 +113,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
             mean_train_loss = 0
             train_batches_n = 0
             for batch_i, (batch_x, batch_y) in enumerate(train_dataloader):
+                start_batch = time.time()
                 if batch_i > max_batches_per_epoch_train:
                     break
 
@@ -129,6 +130,7 @@ def train_eval_loop(model, train_dataset, val_dataset, criterion,
 
                 mean_train_loss += float(loss)
                 train_batches_n += 1
+                print(f"Батч {batch_i} выполнен за {time.time() - start_batch:.2f} секунд")
 
             mean_train_loss /= train_batches_n
             print('Эпоха: {} итераций, {:0.2f} сек'.format(train_batches_n,
