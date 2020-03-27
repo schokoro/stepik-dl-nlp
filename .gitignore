@@ -108,6 +108,8 @@ data/
 .idea/
 results/
 info/
+*.conllu
 *.session*
 *.pickle
+*.pth
 
